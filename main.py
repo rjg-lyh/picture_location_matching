@@ -92,7 +92,7 @@ class Solution:
 
 if __name__ == "__main__":
     solution = Solution()
-    dots = solution.generate_dots(8) #造出8个点
+    dots = solution.generate_dots(224) #造点
     print(dots)
     left_top, right_down = solution.boundingBox(dots)
     print('左上角：', left_top,'右下角：', right_down)
