@@ -39,9 +39,9 @@ class Solution:
         costMatrixs = []
         bestorders = []
         ind_list = []
-        result = {}
+        result = []
         for idx, resolution in enumerate(resolutions):            
-            cost_matrix, anchor_features, center_features = self.make_cost_matrix(centers, resolution)
+            cost_matrix = self.make_cost_matrix(centers, resolution)
             row_ind, col_ind = linear_sum_assignment(cost_matrix)
             cost = cost_matrix[row_ind, col_ind].sum()
             costMatrixs.append(cost_matrix)
@@ -58,10 +58,10 @@ class Solution:
         for i, ind in enumerate(final_col_ind):
             row, col = self.convertForm(ind, h, w)
             ind_list.append([row, col])
-            plt.annotate('(%s,%s)'%(row,col),xy=(centers[i][0],centers[i][1]),xytext=(0,10),textcoords = 'offset points',ha='center')
-            result['center{}'.format(i) + str(centers[i])] = [row, col]
+            plt.annotate('(%s,%s)'%(h - row, col + 1),xy=(centers[i][0],centers[i][1]),xytext=(0,10),textcoords = 'offset points',ha='center')
+            result.append([h - row, col + 1])
 
-        return result, center_features, anchor_features
+        return result
     def make_cost_matrix(self, centers: list, resolution: list):
         anchor_features = self.grid_features(resolution)
         center_features = self.center_features(centers)
@@ -74,7 +74,7 @@ class Solution:
                     sum1 += abs(center_feature[i] - anchor_feature[i])
                 cost.append(sum1)
             cost_matrix.append(cost)
-        return np.array(cost_matrix), anchor_features, center_features
+        return np.array(cost_matrix)
 
     def center_features(self, centers: list):
         center_features = []       
@@ -131,12 +131,10 @@ class Solution:
 
 if __name__ == "__main__":
     solution = Solution()
-    centers = solution.generate_centers(9,9)
+    centers = solution.generate_centers(3,9)
     print(centers)
     solution.drawDots(centers)
-    result, center_features, anchor_features = solution.Hugmatch(centers)
-    print('center_features: ',center_features)
-    print("anchor_features: ", anchor_features)
+    result = solution.Hugmatch(centers)
     plt.show()
                 
 
