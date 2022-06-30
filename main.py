@@ -7,10 +7,13 @@ import math
 class Solution:
     def generate_dots(self, rows: int, cols: int):  #造出number张图片，[[x1, y1], [x2, y2]]表示
         dots = []
-        first_dot_classes = [[[0,0],[300,500]],[[50,50],[800,900]],[[100,100],[1500,2000]]]
+        first_dot_classes = [[[0,0],[1200,1200]],[[50,50],[1160,1280]],[[100,100],[1200,1250]]]
         ratio1_classes = [0.15, 0.2, 0.25, 0.3] #同行间
-        ratio2_classes = [0.1, 0.15, 0.2, 0.23] #异行间
+        ratio2_classes = [0.1, 0.12] #异行间
         ratio3_classes = [0.05, 0.1, 0.15, 0.2] #图片本身缩放率
+        # ratio1_classes = [0.4, 0.5, 0.45, 0.6] #同行间
+        # ratio2_classes = [0.3, 0.4] #异行间
+        # ratio3_classes = [0.15, 0.2, 0.35, 0.4] #图片本身缩放率
         records = []
         for i in range(rows):
             first_dot = random.choice(first_dot_classes)
@@ -50,9 +53,10 @@ class Solution:
         minidx = -1
         costMatrixs = []
         bestorders = []
+        ind_list = []
         result = {}
         for idx, resolution in enumerate(resolutions):            
-            cost_matrix = self.make_cost_matrix(dots, resolution, left_top, right_down)
+            cost_matrix, anchor_dots, center_dots = self.make_cost_matrix(dots, resolution, left_top, right_down)
             row_ind, col_ind = linear_sum_assignment(cost_matrix)
             cost = cost_matrix[row_ind, col_ind].sum()
             costMatrixs.append(cost_matrix)
@@ -68,8 +72,9 @@ class Solution:
         print("最佳匹配形状是{}，其损失表为：\n".format(final_resolution,final_costMatrix))
         for i, ind in enumerate(final_col_ind):
             row, col = self.convertForm(ind, h, w)
+            ind_list.append([row, col])
             result['picture{}'.format(i) + str(dots[i])] = [row, col]
-        return result
+        return result, ind_list, anchor_dots, center_dots
     def resolve(self, number: int):    # W、H拆解
         results = []
         nums = list(range(1, number + 1))
@@ -104,13 +109,13 @@ class Solution:
             for j in range(1, cell_col + 1):
                 anchor_dots.append([left_top[0] + step_col*j, left_top[1] + step_row*i]) #得到锚点
         for dot in dots:
-            center_dots.append([(dot[1][0] - dot[0][0])//2, (dot[1][1] - dot[0][1])//2]) #得到每张图片中心点
+            center_dots.append([dot[0][0] + (dot[1][0] - dot[0][0])//2, dot[0][1] + (dot[1][1] - dot[0][1])//2]) #得到每张图片中心点
         for center_dot in center_dots:
             cost = []
             for anchor_dot in anchor_dots:                                                #计算L2损失
                 cost.append(int(math.sqrt((center_dot[0] - anchor_dot[0])**2 + (center_dot[1] - anchor_dot[1])**2)))
             cost_matrix.append(cost)
-        return np.array(cost_matrix)
+        return np.array(cost_matrix), anchor_dots, center_dots
     def convertForm(self, index: int, row: int, col: int): #将索引值转化为对应的[row, col]格式
         count = 0
         for i in range(row):
@@ -122,24 +127,34 @@ class Solution:
         left_top, right_down = dots[0], dots[1]
         right_top = [right_down[0], left_top[1]]
         left_down = [left_top[0], right_down[1]]
-        plt.plot([left_top[0], right_top[0], right_down[0], left_down[0]], 
-                [left_top[1], right_top[1], right_down[1], left_down[1]],'ro')
+        # plt.scatter([left_top[0], right_top[0], right_down[0], left_down[0]], 
+        #         [left_top[1], right_top[1], right_down[1], left_down[1]],s=50)  #'ro'
+        # plt.annotate('(%s,%s)'%(left_top[0],left_top[1]),xy=(left_top[0],left_top[1]),xytext=(0,10),textcoords = 'offset points',ha='center')
+        # plt.annotate('(%s,%s)'%(left_down[0],left_down[1]),xy=(left_down[0],left_down[1]),xytext=(0,10),textcoords = 'offset points',ha='center')
+        # plt.annotate('(%s,%s)'%(right_top[0],right_top[1]),xy=(right_top[0],right_top[1]),xytext=(0,10),textcoords = 'offset points',ha='center')
+        # plt.annotate('(%s,%s)'%(right_down[0],right_down[1]),xy=(right_down[0],right_down[1]),xytext=(0,10),textcoords = 'offset points',ha='center')
         plt.plot([left_top[0], right_top[0]], [left_top[1], right_top[1]],'r')
         plt.plot([right_top[0], right_down[0]], [right_top[1], right_down[1]],'r')
         plt.plot([right_down[0], left_down[0]], [right_down[1], left_down[1]],'r')
         plt.plot([left_down[0], left_top[0]], [left_down[1], left_top[1]],'r')
- 
+    def drawCenter(self, dots: list, ind_list: list):
+        for i in range(len(dots)):
+            center_x, center_y = dots[i][0][0] + (dots[i][1][0] - dots[i][0][0])//2, dots[i][0][1] + (dots[i][1][1] - dots[i][0][1])//2
+            print(center_x, center_y)
+            row, col = ind_list[i][0], ind_list[i][1]
+            plt.scatter([center_x],[center_y],marker='s',s=50)
+            plt.annotate('(%s,%s)'%(row,col),xy=(center_x,center_y),xytext=(0,10),textcoords = 'offset points',ha='center')
+
 if __name__ == "__main__":
     solution = Solution()
-    dots = solution.generate_dots(3,4) #造点
+    dots = solution.generate_dots(4, 5) #造点
     print(dots)
-    print(len(dots))
+    result, ind_list, anchor_dots, center_dots = solution.Hugmatch(dots)
     for dot in dots:
         solution.drawPicture(dot)
+    solution.drawCenter(dots, ind_list)
+    print(anchor_dots)
+    print(center_dots)
     plt.show()
-    # left_top, right_down = solution.boundingBox(dots)
-    # print('左上角：', left_top,'右下角：', right_down)
-    # print(solution.resolve(len(dots)))
-    # result = solution.Hugmatch(dots)
-    # print(result)
+
 
