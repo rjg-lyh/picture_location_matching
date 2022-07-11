@@ -131,11 +131,12 @@ class Solution:
 
 if __name__ == "__main__":
     solution = Solution()
-    centers = solution.generate_centers(3,9)
-    print(centers)
-    solution.drawDots(centers)
+    centers = [[100.2, 120.4], [200.1, 210], [210.3, 115.8], [102.5, 200.1]]
     result = solution.Hugmatch(centers)
-    plt.show()
+    print(result)
+    #solution.drawDots(centers)
+    #plt.show()
+
                 
 
 
