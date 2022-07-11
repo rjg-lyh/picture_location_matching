@@ -58,8 +58,8 @@ class Solution:
         for i, ind in enumerate(final_col_ind):
             row, col = self.convertForm(ind, h, w)
             ind_list.append([row, col])
-            plt.annotate('(%s,%s)'%(h - row, col + 1),xy=(centers[i][0],centers[i][1]),xytext=(0,10),textcoords = 'offset points',ha='center')
-            result.append([h - row, col + 1])
+            plt.annotate('(%s,%s)'%(row + 1, col + 1),xy=(centers[i][0],centers[i][1]),xytext=(0,10),textcoords = 'offset points',ha='center')
+            result.append([row + 1, col + 1])
 
         return result
     def make_cost_matrix(self, centers: list, resolution: list):
@@ -134,8 +134,8 @@ if __name__ == "__main__":
     centers = [[100.2, 120.4], [200.1, 210], [210.3, 115.8], [102.5, 200.1]]
     result = solution.Hugmatch(centers)
     print(result)
-    #solution.drawDots(centers)
-    #plt.show()
+    solution.drawDots(centers)
+    plt.show()
 
                 
 

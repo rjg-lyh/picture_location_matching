@@ -3,7 +3,7 @@
 ```python
 solution = Solution()
 centers = [[100.2, 120.4], [200.1, 210], [210.3, 115.8], [102.5, 200.1]]
-result = solution.Hugmatch(centers) # outputs: [[2, 1], [1, 2], [2, 2], [1, 1]]
+result = solution.Hugmatch(centers) # outputs: [[1, 1], [2, 2], [1, 2], [2, 1]]
 ```
 
 **输入参数**:
